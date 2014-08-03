@@ -37,8 +37,7 @@ function Device(data) {
             return cb([0,0,0]);
         }
         var mixed = rybColorMixer.mix(rgbColors, {result: 'rgb'});
-        var hsl = (color(mixed)).hsl();
-        return cb([hsl.hue(), hsl.saturation(), hsl.lightness()]);
+         return cb(mixed);
     };
 
     var beacon = Beacon.get(this.beacon);
