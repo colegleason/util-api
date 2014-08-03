@@ -1,2 +1,2 @@
-worker: node app.js
-web: python -mSimpleHTTPServer
+web: node app.js
+

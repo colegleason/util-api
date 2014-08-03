@@ -77,4 +77,11 @@ async.series(
     });
 
     setInterval(resetDevices, 1000 * 1);
+var http = require("http");
+var server = http.createServer(function(request, response) {
+      response.writeHead(200, {"Content-Type": "text/html"});
+    response.end();
+
+});
+server.listen(process.env.PORT || 5000);
 });
