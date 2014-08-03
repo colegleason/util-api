@@ -38,7 +38,7 @@ function resetDevices() {
     var devices = getAllDevices();
     devices.forEach(function(device) {
         var users = device.nearbyUsers();
-        var states = _.compact(_.pluck(users, 'rgbcolor'));
+        var states = _.compact(_.pluck(_.filter(users, function(u) { return u.on; }), 'rgbcolor'));
         device.normalize(states, function(newState) {
             device.update({state: newState});
         });
