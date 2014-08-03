@@ -16,8 +16,10 @@ function User(data) {
     }
     beacon.addUser(this.name);
 
+    this.whitelist = ['name', 'beacon', 'devices', 'color', 'rgbcolor', 'vector','on'];
+
     this.save = function(cb) {
-        app.store.set(User)(this.username, cb);
+        app.store.set(User)(_.pick(this, this.whitelist),this.name, cb);
     };
 
     return this;

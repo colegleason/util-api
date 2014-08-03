@@ -28,14 +28,16 @@ function Beacon(data) {
     };
 
     this.addUser = function(username) {
-        this.users.push(username);
-        this.users = _.uniq(this.users);
+        var tmp = _.clone(this.users);
+        tmp.push(username);
+        this.users = _.uniq(tmp);
         this.save();
     };
 
     this.addDevice = function(name) {
-        this.devices.push(name);
-        this.devices = _.uniq(this.devices);
+        var tmp = _.clone(this.devices);
+        tmp.push(name);
+        this.devices = _.uniq(tmp);
 
         this.save();
     };

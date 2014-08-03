@@ -15,17 +15,35 @@ function trainAndSetState(user) {
     console.log("training for user", user.name);
     var devices = devicesForBeacon(user.beacon);
     devices.forEach(function(device) {
-        console.log("training for user/device", user.name, device);
+        console.log("training for user/device", user.name, device.name);
         var state = train(user, device);
+    });
+    resetDevices();
+};
+
+function getAllDevices() {
+    var seen = {};
+    var result = [];
+    var devices = store.localStore.devices;
+    _.keys(devices).forEach(function(deviceName) {
+        if (!seen[deviceName]) {
+            seen[deviceName] = true;
+            result.push(new Device.Device(devices[deviceName]));
+        }
+    });
+    return result;
+}
+
+function resetDevices() {
+    var devices = getAllDevices();
+    devices.forEach(function(device) {
         var users = device.nearbyUsers();
         var states = _.compact(_.pluck(users, 'rgbcolor'));
         device.normalize(states, function(newState) {
-            console.log(newState);
             device.update({state: newState});
         });
     });
-};
-
+}
 
 function devicesForBeacon(beaconName) {
     var beacon = Beacon.get(beaconName);
@@ -40,18 +58,7 @@ function devicesForBeacon(beaconName) {
 
 function train(user, device) {
     user.state = user.rgbcolor;
-    return user.rgbcolor;
-}
-
-// Reurns all state objects for a given set of users.
-function getAllStates(usernames) {
-    var result = [];
-    _.each(usernames, function(username) {
-        User.get(username, function(user) {
-            result.push(user.state);
-        });
-    });
-    return result;
+    return user.state;
 }
 
 async.series(
@@ -68,4 +75,6 @@ async.series(
     User.on('child_added', trainAndSetState, function (errorObject) {
         console.log('The read failed: ' + errorObject.code);
     });
+
+    setInterval(resetDevices, 1000 * 1);
 });

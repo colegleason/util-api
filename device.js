@@ -36,21 +36,16 @@ function Device(data) {
         if (rgbColors.length == 0) {
             return cb([0,0,0]);
         }
-        console.log(rgbColors);
         var mixed = rybColorMixer.mix(rgbColors, {result: 'rgb'});
-        console.log(mixed);
         var hsl = (color(mixed)).hsl();
-        console.log(hsl);
         return cb([hsl.hue(), hsl.saturation(), hsl.lightness()]);
     };
 
-    console.log("adding device to beacon", this.beacon);
     var beacon = Beacon.get(this.beacon);
     if (beacon == null) {
         beacon = new Beacon.Beacon({name: this.beacon});
     }
     beacon.addDevice(this.name);
-
     return this;
 }
 module.exports.path = Device.path = 'devices';
