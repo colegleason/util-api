@@ -1,7 +1,11 @@
 var _ = require('underscore');
 var path = require('path');
 var rybColorMixer = require('ryb-color-mixer');
+var async = require('async');
+var color = require("onecolor");
+
 var app = require('./app');
+var Beacon = require('./beacon');
 
 function Device(data) {
     if (!(this instanceof Device)) {
@@ -17,13 +21,40 @@ function Device(data) {
         app.store.update(Device)(this.name, data, cb);
     };
 
-    this.normalize = function(states, cb) {
-        return cb(rybColorMixer.mix(states, {result: 'rgb'}));
+    // Returns all users associated with a device.
+    this.nearbyUsers = function(device, cb) {
+        var beacon = Beacon.get(this.beacon);
+        var users = beacon.nearbyUsers();
+        return _.uniq(users);
     };
+
+    this.normalize = function(states, cb) {
+        var rgbColors = _.map(states, function(state) {
+            var rgb = new color.RGB(state[0], state[1], state[2]);
+            return rgb.hex();
+        });
+        if (rgbColors.length == 0) {
+            return cb([0,0,0]);
+        }
+        console.log(rgbColors);
+        var mixed = rybColorMixer.mix(rgbColors, {result: 'rgb'});
+        console.log(mixed);
+        var hsl = (color(mixed)).hsl();
+        console.log(hsl);
+        return cb([hsl.hue(), hsl.saturation(), hsl.lightness()]);
+    };
+
+    console.log("adding device to beacon", this.beacon);
+    var beacon = Beacon.get(this.beacon);
+    if (beacon == null) {
+        beacon = new Beacon.Beacon({name: this.beacon});
+    }
+    beacon.addDevice(this.name);
 
     return this;
 }
-Device.path = 'devices';
+module.exports.path = Device.path = 'devices';
 
 module.exports.get = Device.prototype.get = app.store.get(Device);
 module.exports.on = Device.prototype.on = app.store.on(Device);
+module.exports.Device = Device;
